@@ -1,35 +1,33 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <math.h>
-
 #include <stdlib.h>
 #include <time.h>
 
-#define INPUT_SIZE 512
-#define NUM_THREADS 256
+#define INPUT_SIZE 150000000
+#define NUM_THREADS 4
 
 typedef struct {
 	int thread_id;
-	int level;
+	int start;
+	int end;
 } prefixSumMsg;
 
-typedef struct barrier_node {
+struct barrier_node {
 	pthread_mutex_t count_lock;
 	pthread_cond_t ok_to_proceed_up;
 	pthread_cond_t ok_to_proceed_down;
 	int count;
-} barrier_t_internal;
+};
 
 typedef struct barrier_node logbarrier_t[NUM_THREADS];
 
 logbarrier_t upPhaseBarr, downPhaseBarr, endPhaseBarr;
-int input[INPUT_SIZE];
-int prefix[INPUT_SIZE];
-int check[INPUT_SIZE];
-//int prefix[INPUT_SIZE]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-//int input[INPUT_SIZE]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-//int check[INPUT_SIZE]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-//int prefix[INPUT_SIZE]={3,1,7,0,4,1,6,3};
+int input [INPUT_SIZE];
+int check [INPUT_SIZE];
+int   sum [2*NUM_THREADS];
+//int input[INPUT_SIZE]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+//int check[INPUT_SIZE]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
 //int input[INPUT_SIZE]={3,1,7,0,4,1,6,3};
 //int check[INPUT_SIZE]={3,1,7,0,4,1,6,3};
 
@@ -88,50 +86,67 @@ void logbarrier (logbarrier_t b, int num_threads, int thread_id) {
 
 void downPhase(prefixSumMsg msg) {
 	int id    = 2 * (msg.thread_id+1);
-	int limit = log2(INPUT_SIZE);
-	int inc_1, inc, left, right, temp;
-	int num_threads = NUM_THREADS;
-	for(int depth = limit-1; depth >= 0; depth--) {
-		inc_1 = (int)pow(2, depth+1);
-		inc   = (int)pow(2, depth);
+	int limit = log2(2*NUM_THREADS);
+	int inc_1, i, inc, left, right, temp, depth;
+	for(depth = limit-1; depth >= 0; depth--) {
+		inc_1 = (1 << (depth+1));
+		inc   = (1 <<  depth);
 		if(id % inc_1 != 0) {
-			printf("Thread Idle: %d num_threads: %d\n",msg.thread_id, num_threads);
-			logbarrier(downPhaseBarr, num_threads, msg.thread_id);
+	//		printf("Thread Idle: %d num_threads: %d\n",msg.thread_id, num_threads);
+			logbarrier(downPhaseBarr, NUM_THREADS, msg.thread_id);
 			continue;
 		}		
-		printf("--Thread %d: Depth %d num_threads:%d\n",msg.thread_id, depth, num_threads);
+	//	printf("--Thread %d: Depth %d num_threads:%d\n",msg.thread_id, depth, num_threads);
 		left = id-inc-1;
 		right = id-1;
-		printf("--Thread %d: Depth %d left:%d, right:%d, \n",msg.thread_id, depth, left, right);
-		temp = prefix[left];
-		prefix[left] = prefix[right];
-		prefix[right] += temp;
-		logbarrier(downPhaseBarr, num_threads, msg.thread_id);
+	//	printf("--Thread %d: Depth %d left:%d, right:%d, \n",msg.thread_id, depth, left, right);
+		temp = sum[left];
+		sum[left] = sum[right];
+		sum[right] += temp;
+		logbarrier(downPhaseBarr, NUM_THREADS, msg.thread_id);
 	}
 	logbarrier(endPhaseBarr, NUM_THREADS, msg.thread_id);
-	//printf("--Thread %d: Adding left: %d and right: %d\n",msg.thread_id,left, right);
-	input[left] += prefix[left];
-	input[right] += prefix[right];
+
+//		printf("xxxxThread : %d start: %d end: %d\n",msg.thread_id , msg.start, msg.end);
+	temp = (msg.end - msg.start)/2;
+	if(temp == 0) {
+	//	printf("--Thread %d: left:%d, right:%d, input[left]:%d input[right]:%d\n",msg.thread_id, left, right, input[left], input[right]);
+		input[msg.start]   += sum[left];	
+		input[msg.end]  += sum[right];
+	} else {
+		depth = msg.start + temp;
+		for(i = msg.start; i < depth; i++) {
+//		printf("--Thread %d: Adding i: %d left:%d, input[i]:%d sum[left]:%d\n",msg.thread_id, i, left, input[i], sum[left]);
+			input[i] += sum[left];
+		}
+		for(i = (msg.start + temp); i <= msg.end; i++) {
+//	printf("--Thread %d: Adding i: %d right:%d, input[i]:%d sum[right]:%d\n",msg.thread_id, i, right, input[i], sum[right]);
+			input[i] += sum[right];
+		}
+	}
+	
 }
 
 
 void upPhase(prefixSumMsg msg) {
 	int id    = 2 * msg.thread_id;
-	int limit = log2(INPUT_SIZE);
-	int inc_1, inc, left, right;
-	int num_threads = NUM_THREADS;
-	for(int depth = 0; depth < limit; depth++) {
-		printf("Thread %d: Depth %d num_threads:%d\n",msg.thread_id, depth, num_threads);
-		inc_1 = (int)pow(2, depth+1);
-		inc   = (int)pow(2, depth);
+	int limit = log2(2*NUM_THREADS);
+	int inc_1, inc, left, right, depth;
+	for(depth = 0; depth < limit; depth++) {
+		//printf("Thread %d: Depth %d num_threads:%d\n",msg.thread_id, depth, num_threads);
+		inc_1 = (1 << depth+1);
+		inc   = (1 << depth);
 		left = id+inc-1;
 		right = id+inc_1-1;
-		prefix[right] = prefix[left]+prefix[right];
-		logbarrier(upPhaseBarr, num_threads, msg.thread_id);
+		sum[right] = sum[left]+sum[right];
+		if((depth == limit-1) && (right == 2*NUM_THREADS-1)) {
+			sum[right] = 0;
+		}
+		logbarrier(upPhaseBarr, NUM_THREADS, msg.thread_id);
 		if((msg.thread_id+1)%inc_1 != 0) {
-			printf("Thread Idle: %d num_threads: %d\n",msg.thread_id, num_threads);
+			//printf("Thread Idle: %d num_threads: %d\n",msg.thread_id, num_threads);
 			for(depth++; depth < limit; depth++) {
-				logbarrier(upPhaseBarr, num_threads, msg.thread_id);
+				logbarrier(upPhaseBarr, NUM_THREADS, msg.thread_id);
 			}
 		} else {
 			id -= inc_1;
@@ -139,15 +154,42 @@ void upPhase(prefixSumMsg msg) {
 	}
 }
 
+
 void *calcPrefixSum(void* ps_msg) {
-	printf("Starting up phase.......\n");
 	prefixSumMsg msg = *(prefixSumMsg *)ps_msg;
+	int s = 0, i;
+	int half = (msg.end - msg.start)/2;
+	if( half == 0) {
+		sum[2*msg.thread_id]   = input[msg.start];	
+		sum[2*msg.thread_id+1] = input[msg.end];
+	} else {
+		for(i = msg.start; i < (msg.start+half); i++) {
+			s += input[i];
+			if(i-msg.start > 0) {
+				input[i] += input[i-1];
+			}
+		}
+		sum[2*msg.thread_id] = s;
+		for(s = 0,i = (msg.start + half); i <= msg.end; i++) {
+			s += input[i];
+			if((i-(msg.start+half)) > 0) {
+				input[i] += input[i-1];
+			}
+		}
+		sum[2*msg.thread_id+1] = s;
+	}
+	//printf("//////Thread : %d Sum: %d %d\n",msg.thread_id ,sum[2*msg.thread_id], sum[2*msg.thread_id+1]);
+	logbarrier(upPhaseBarr, NUM_THREADS, msg.thread_id);
+
+//	printf("Starting up phase.......\n");
 	upPhase(msg);
 	logbarrier(downPhaseBarr, NUM_THREADS, msg.thread_id);
-	prefix[INPUT_SIZE-1] = 0;
-	printf("last element: %d\n",prefix[INPUT_SIZE-1]);
-	logbarrier(downPhaseBarr, NUM_THREADS, msg.thread_id);
-	printf("Starting down phase.......\n");
+
+//	sum[2*NUM_THREADS-1] = 0;
+//	logbarrier(downPhaseBarr, NUM_THREADS, msg.thread_id);
+
+//	printf("Starting down phase.......\n");
+
 	downPhase(msg);
 }
 
@@ -159,14 +201,24 @@ void prefixSum(int* a, const int len, const int num_threads) {
 	init_barrier(upPhaseBarr);
 	init_barrier(downPhaseBarr);
 	init_barrier(endPhaseBarr);
+	int group = len / num_threads;
+	int rem   = len % num_threads;
+	int start = 0, end = -1;
 	for(int i = 0; i < num_threads; i++) {
 		ps_msg[i].thread_id = i;
-		ps_msg[i].level = 0;
-		printf("Creating thread %d\n",i);
+		start = end + 1;
+		end = start + group - 1;
+		if(rem > 0) {
+			rem--;
+			end++;
+		}
+		ps_msg[i].start = start;
+		ps_msg[i].end   = end;
+		//printf("Creating thread %d with start %d end %d\n",i, start, end);
 		int rc = pthread_create(&threads[i], NULL, calcPrefixSum, 
 				        (void *) &ps_msg[i]);
 		if(rc == -1) {
-			printf("prefixSum: pthread_create\n",__func__);
+			//printf("prefixSum: pthread_create\n",__func__);
 			exit(0);
 		}
 	}
@@ -177,28 +229,37 @@ void prefixSum(int* a, const int len, const int num_threads) {
 
 
 int main() {
-	int sum[NUM_THREADS];
 	srand(time(NULL));
 	for(int i = 0; i < INPUT_SIZE; i++) {
-		check[i] = prefix[i] = input[i] = rand() % 2;
+		check[i] = input[i] = rand()%2;
 	}
-	time_t start, end;
-	time(&start);
+	clock_t start, end;
+	double stime, ptime;
+	start = clock();
 	prefixSum(input, INPUT_SIZE, NUM_THREADS);
-	time(&end);
-	printf("Parallel Time: %0.2f\n", difftime(end, start));
-	time(&start);
+	end = clock();
+	ptime = end-start;
+	printf("Parallel Time: %lf\n", ptime);
+
+	for(int i=0;i<2*NUM_THREADS;i++){
+//		printf("%d ",sum[i]);
+	}
+	printf("\n");
+
+	start = clock();
 	for(int i = 1; i < INPUT_SIZE; i++) {
 		check[i] += check[i-1];
 	}
-	time(&end);
-	printf("Serial Time: %0.2f\n", difftime(end, start));
+	end = clock();
+	stime = end-start;
+	printf("Serial Time: %lf\n", stime);
 	for(int i=0;i<INPUT_SIZE;i++){
 		if(input[i] != check[i]){
-			printf("------FAIL:%d %d-------\n",prefix[i], check[i]);
+			printf("------FAIL:%d %d-------\n",input[i], check[i]);
 		}
-		//printf("%d %d\n",input[i], check[i]);
+	//	printf("%d %d\n",input[i], check[i]);
 	}
+	printf("Speedup: %lf\n",(double)stime/ptime);
 	printf("\n");
 	return 0;
 }
