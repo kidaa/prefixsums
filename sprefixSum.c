@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define INPUT_SIZE 10000000
+#define INPUT_SIZE 100000000
 
 int input[INPUT_SIZE];
 
