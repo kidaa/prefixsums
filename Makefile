@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -g
 OFLAGS = -lpthread
 
-all: clean prefixsum
+all: prefixsum
 	  
 prefixsum: 
 	@$(CC) $(CFLAGS) $(OFLAGS) prefixSum.cpp -o prefixSum
