@@ -1,0 +1,206 @@
+Input: 460 647 810 575 916 672 890 672 87 375 713 73 112 331 67 227 345 935 826 355 579 228 330 339 157 726 554 121 22 217 618 835 864 429 762 132 453 652 156 540 28 222 966 140 553 33 720 251 321 898 
+Median: 453 pos: 25
+After median 132 28 22 121 140 33 67 112 87 73 156 222 217 251 157 227 228 321 331 330 375 345 355 339 429 453 460 540 672 672 618 575 647 554 553 720 579 652 713 762 864 835 966 726 826 935 890 916 810 898 
+453 28 22 121 140 33 67 112 87 73 156 222 217 251 157 227 228 321 331 330 375 345 355 339 429 132 460 540 672 672 618 575 647 554 553 720 579 652 713 762 864 835 966 726 826 935 890 916 810 898 
+
+Thread id: 0 pstart: 0 pend: 49 start: 0 end: 12 first_thread:0 last_thread: 3
+
+Thread id: 1 pstart: 0 pend: 49 start: 13 end: 25 first_thread:0 last_thread: 3
+Start: Thread 0: barr_id: 0 loop from 0 to 12
+I am the start thread: 0 incrementing index: 1
+
+Local Rearragement on thread: 0 cnt1: 12 cnt2: 0
+453 28 22 121 140 33 67 112 87 73 156 222 217 
+ waiting on 0 
+Start: Thread 1: barr_id: 0 loop from 13 to 25
+
+Local Rearragement on thread: 1 cnt1: 13 cnt2: 0
+251 157 227 228 321 331 330 375 
+Thread id: 2 pstart: 0 pend: 49 start: 26 end: 37 first_thread:0 last_thread: 3
+Start: Thread 2: barr_id: 0 loop from 26 to 37
+
+Thread id: 3 pstart: 0 pend: 49 start: 38 end: 49 first_thread:0 last_thread: 3
+Start: Thread 3: barr_id: 0 loop from 38 to 49
+
+Local Rearragement on thread: 3 cnt1: 0 cnt2: 12
+762 864 835 966 726 826 935 890 916 810 898 713 
+ waiting on 0 
+
+Local Rearragement on thread: 2 cnt1: 0 cnt2: 12
+540 672 672 618 575 647 554 553 720 579 652 460 
+ waiting on 0 
+345 355 339 429 132 
+ waiting on 0 
+
+Total Local Rearragement on 0 cnt1: 12 cnt2: 0: 
+453 28 22 121 140 33 67 112 87 73 156 222 217 251 Before Prefix Sum2: 157 227 228 321 331 330 375 345 355 339 429 132 540 672 672 618 575 647 554 553 720 579 652 460 762 864 835 966 726 826 935 890 916 810 898 713 
+Before Prefix Sum1: 12 13 0 0 
+Prefix Sum1: 0 12 25 25 
+0 0 12 12 
+Prefix Sum2: 0 0 0 12 
+Pivot index is : 25
+Final: 28 22 121 140 33 67 112 87 73 156 222 217 251 157 227 228 321 331 330 375 345 355 339 429 132 453 540 672 672 618 575 647 554 553 720 579 652 460 762 864 835 966 726 826 935 890 916 810 898 713 
+
+---------Thread: 0 First Paritioning: k:25 group:12 rem:1 first: 2 last: 2------------
+loop from: 0 to 2
+
+---------Thread: 0 Second Paritioning: k:25 group:12 rem:1 first: 2 last: 2------------
+loop from: 2 to 4
+Thread id: 0 pstart: 0 pend: 24 start: 0 end: 12 first_thread:0 last_thread: 1
+Thread id: 1 pstart: 0 pend: 24 start: 13 end: 24 first_thread:0 last_thread: 1
+Thread id: 2 pstart: 25 pend: 49 start: 25 end: 37 first_thread:2 last_thread: 3
+Thread id: 3 pstart: 25 pend: 49 start: 38 end: 49 first_thread:2 last_thread: 3
+Finding median from 0 to 25 at 12
+
+Adding pivots indices in 0, value: 12
+Adding pivot in 0, value: 217
+Swapping 12 and 0
+First Median: 217 pos: 12 Index: 0
+Finding median from 25 to 50 at 36
+After median 217 22 121 132 33 67 112 87 73 140 156 157 28 222 227 228 321 331 330 375 345 355 339 429 251 453 540 460 652 618 575 647 554 553 579 672 672 720 762 864 835 966 726 826 935 890 916 810 898 713 
+Adding pivots indices in 2, value: 36
+Adding pivot in 2 value: 672
+Swapping 36 and 25
+Second Median: 672 pos: 36 Index: 2
+Input: 217 22 121 132 33 67 112 87 73 140 156 157 28 222 227 228 321 331 330 375 345 355 339 429 251 672 540 460 652 618 575 647 554 553 579 672 453 720 762 864 835 966 726 826 935 890 916 810 898 713 
+--------------------------------------------------------
+
+cbarr: 0 2
+cbarr: 2 2
+Thread id: 0 Master thread done !!
+
+Thread id: 0 pstart: 0 pend: 24 start: 0 end: 12 first_thread:0 last_thread: 1
+
+Thread id: 1 pstart: 0 pend: 24 start: 13 end: 24 first_thread:0 last_thread: 1
+Start: Thread 1: barr_id: 0 loop from 13 to 24
+
+Local Rearragement on thread: 1 cnt1: 0 cnt2: 12
+227 228 321 331 330 375 345 355 339 429 251 222 
+ waiting on 0 
+
+Thread id: 3 pstart: 25 pend: 49 start: 38 end: 49 first_thread:2 last_thread: 3
+Start: Thread 3: barr_id: 2 loop from 38 to 49
+Start: Thread 0: barr_id: 0 loop from 0 to 12
+I am the start thread: 0 incrementing index: 1
+
+Local Rearragement on thread: 0 cnt1: 12 cnt2: 0
+217 22 121 132 33 67 112 87 73 140 156 157 28 
+ waiting on 0 
+
+Total Local Rearragement on 0 cnt1: 12 cnt2: 0: 
+217 22 121 132 33 67 112 87 73 140 156 157 28 227 228 321 331 330 375 345 355 339 429 251 222 
+Before Prefix Sum1: 12 0 
+Prefix Sum1: 0 12 
+
+Local Rearragement on thread: 3 cnt1: 0 cnt2: 12
+864 835 966 726 826 935 890 916 810 898 713 762 
+ waiting on 2 
+
+Thread id: 2 pstart: 25 pend: 49 start: 25 end: 37 first_thread:2 last_thread: 3
+Start: Thread 2: barr_id: 2 loop from 25 to 37
+I am the start thread: 2 incrementing index: 26
+
+Local Rearragement on thread: 2 cnt1: 10 cnt2: 2
+672 540 460 652 618 575 647 554 553 579 453 720 672 
+ waiting on 2 
+
+Total Local Rearragement on 2 cnt1: 10 cnt2: 2: 
+672 540 460 652 618 575 647 554 553 579 453 Before Prefix Sum2: 720 672 864 835 966 726 826 2 Before Prefix Sum2: 12 
+Prefix Sum2: 0 2 
+Pivot index is : 36
+0 12 
+Prefix Sum2: 0 0 
+Pivot index is : 12
+935 890 916 810 898 713 762 
+Before Prefix Sum1: 10 0 
+Prefix Sum1: 0 10 
+Final: 22 121 132 33 67 112 87 73 140 156 157 28 217 227 228 321 331 330 375 345 355 339 429 251 222 
+
+---------Thread: 0 First Paritioning: k:12 group:12 rem:0 first: 1 last: 1------------
+loop from: 0 to 1
+
+---------Thread: 0 Second Paritioning: k:13 group:13 rem:0 first: 1 last: 1------------
+loop from: 1 to 2
+Thread id: 0 pstart: 0 pend: 11 start: 0 end: 11 first_thread:0 last_thread: 0
+Thread id: 1 pstart: 12 pend: 24 start: 12 end: 24 first_thread:1 last_thread: 1
+Thread id: 2 pstart: 25 pend: 49 start: 25 end: 37 first_thread:2 last_thread: 3
+Thread id: 3 pstart: 25 pend: 49 start: 38 end: 49 first_thread:2 last_thread: 3
+Finding median from 0 to 12 at 5
+
+Adding pivots indices in 0, value: 5
+Adding pivot in 0, value: 87
+Swapping 5 and 0
+First Median: 87 pos: 5 Index: 0
+Finding median from 12 to 25 at 17
+After median 87 28 73 33 67 22 112 132 140 156 157 121 217 227 228 251 222 321 375 345 355 339 429 330 331 540 460 652 618 575 647 554 553 579 453 579 672 720 672 864 835 966 726 826 935 890 916 810 898 713 
+Adding pivots indices in 1, value: 17
+Adding pivot in 1 value: 321
+Swapping 17 and 12
+Second Median: 321 pos: 17 Index: 1
+Input: 87 28 73 33 67 22 112 132 140 156 157 121 321 227 228 251 222 217 375 345 355 339 429 330 331 540 460 652 618 575 647 554 553 579 453 579 672 720 672 864 835 966 726 826 935 890 916 810 898 713 
+--------------------------------------------------------
+
+cbarr: 0 1
+cbarr: 1 1
+Thread id: 0 Master thread done !!
+
+Thread id: 0 pstart: 0 pend: 11 start: 0 end: 11 first_thread:0 last_thread: 0
+
+
+Thread 0: RETURNED
+
+
+Thread id: 1 pstart: 12 pend: 24 start: 12 end: 24 first_thread:1 last_thread: 1
+
+
+Thread 1: RETURNED
+
+Final: 540 460 652 618 575 647 554 553 579 453 579 672 720 672 864 835 966 726 826 935 890 916 810 898 713 
+
+---------Thread: 2 First Paritioning: k:11 group:11 rem:0 first: 1 last: 1------------
+loop from: 2 to 3
+
+---------Thread: 2 Second Paritioning: k:14 group:14 rem:0 first: 1 last: 1------------
+loop from: 3 to 4
+Thread id: 0 pstart: 0 pend: 11 start: 0 end: 11 first_thread:0 last_thread: 0
+Thread id: 1 pstart: 12 pend: 24 start: 12 end: 24 first_thread:1 last_thread: 1
+Thread id: 2 pstart: 25 pend: 35 start: 25 end: 35 first_thread:2 last_thread: 2
+Thread id: 3 pstart: 36 pend: 49 start: 36 end: 49 first_thread:3 last_thread: 3
+Finding median from 25 to 36 at 30
+
+Adding pivots indices in 2, value: 30
+Adding pivot in 2, value: 575
+Swapping 30 and 25
+First Median: 575 pos: 30 Index: 2
+Finding median from 36 to 50 at 42
+After median 22 28 33 67 73 87 112 121 132 140 156 157 217 222 227 228 251 321 330 331 339 345 355 375 429 575 460 540 553 554 453 579 579 618 647 652 672 720 672 713 726 810 826 835 935 890 916 966 898 864 
+Adding pivots indices in 3, value: 42
+Adding pivot in 3 value: 826
+Swapping 42 and 36
+Second Median: 826 pos: 42 Index: 3
+Input: 22 28 33 67 73 87 112 121 132 140 156 157 217 222 227 228 251 321 330 331 339 345 355 375 429 575 460 540 553 554 453 579 579 618 647 652 826 720 672 713 726 810 672 835 935 890 916 966 898 864 
+--------------------------------------------------------
+
+cbarr: 2 1
+cbarr: 1 1
+Thread id: 2 Master thread done !!
+
+Thread id: 2 pstart: 25 pend: 35 start: 25 end: 35 first_thread:2 last_thread: 2
+
+
+Thread 2: RETURNED
+
+
+Thread id: 3 pstart: 36 pend: 49 start: 36 end: 49 first_thread:3 last_thread: 3
+
+
+Thread 3: RETURNED
+
+Parallel Time: time_p - 0.004256
+Serial Time: time_s - 0.000000
+fail
+Input:
+Ouput:
+22, 28, 33, 67, 73, 87, 112, 121, 132, 140, 156, 157, 217, 222, 227, 228, 251, 321, 330, 331, 339, 345, 355, 375, 429, 453, 460, 540, 553, 554, 575, 579, 579, 618, 647, 652, 672, 672, 713, 720, 726, 810, 826, 835, 864, 890, 898, 916, 935, 966, 
+Expected answer:
+22, 28, 33, 67, 73, 87, 112, 121, 132, 140, 156, 157, 217, 222, 227, 228, 251, 321, 330, 331, 339, 345, 355, 375, 429, 453, 460, 540, 553, 554, 575, 579, 618, 647, 652, 672, 672, 713, 720, 726, 762, 810, 826, 835, 864, 890, 898, 916, 935, 966,

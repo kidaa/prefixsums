@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#define INPUT_SIZE 100000000
-#define NUM_THREADS 11
+#define INPUT_SIZE 10000000
+#define NUM_THREADS 8
 
 typedef struct {
 	int thread_id;
@@ -62,8 +62,10 @@ void *calcPrefixSum(void* ps_msg) {
 		pthread_barrier_wait(&barr);
 		inc_1 = inc;
 	}
-	for(i = msg.start; i <= msg.end; i++) {
-		input[i] += sum[msg.thread_id];
+	if(sum[msg.thread_id] != 0) {
+		for(i = msg.start; i <= msg.end; i++) {
+			input[i] += sum[msg.thread_id];
+		}
 	}
 }
 
