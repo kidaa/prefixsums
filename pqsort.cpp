@@ -9,10 +9,10 @@
 #include <iostream>
 using namespace std;
 
-#define INPUT_SIZE 16
+#define INPUT_SIZE 1000
 #define NUM_THREADS 4
-//#define printf(x,...) 
-//#define DEBUG
+#define printf(x,...) 
+#define DEBUG
 
 typedef struct {
 	int thread_id;
@@ -31,11 +31,12 @@ int sum1 [NUM_THREADS];
 int sum2 [NUM_THREADS];
 int pivots [NUM_THREADS];
 int pivots_indices [NUM_THREADS];
-//int input1[INPUT_SIZE]={205, 618, 792, 409, 514, 208, 98, 98, 795, 72, 604, 819, 632, 514, 81, 540 };
+int input1[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
+int check[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
 int input2 [INPUT_SIZE];
-int input1 [INPUT_SIZE];
+//int input1 [INPUT_SIZE];
 int input3 [INPUT_SIZE];
-int check [INPUT_SIZE];
+//int check [INPUT_SIZE];
 //int check[INPUT_SIZE]={205, 618, 792, 409, 514, 208, 98, 98, 795, 72, 604, 819, 632, 514, 81, 540 };
 
 //int check[INPUT_SIZE] = {460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
@@ -77,8 +78,8 @@ int comp (const void * a, const void * b) {
 void *calcPrefixSum(void* tid) {
 	int inc_1, inc, left, temp, i, j, right, depth, cnt1, cnt2;
 	int  prev_lt, prev_end, pstart;
-	int first, last, num_threads, group, s, e, rem, k, barr_id, t;
-	double k1, k2;
+	int first, last, num_threads, group1, group2, s, e, rem1, rem2, barr_id, t;
+	int k1, k2, new_pend;
 	int thread_id = *(int *)tid;
 	int *from, *to, *tp;
 	from = input1;
@@ -225,19 +226,35 @@ void *calcPrefixSum(void* tid) {
 		num_threads = ps_msg[thread_id].last_thread - barr_id + 1;
 		k1     = pivots_indices[barr_id] - ps_msg[thread_id].start; 
 		k2     = prev_end - pivots_indices[barr_id] + 1; 
-		first = (k1/(k1+k2))*num_threads;
+		first = ((double)k1/(double)(k1+k2))*num_threads;
+		first = (first == 0)?1:first;
 		last  = num_threads - first;
-		k     = pivots_indices[barr_id] - ps_msg[thread_id].start; 
-		group = (first > 0)?k/first:k;
-		rem   = (first > 0)?k%first:0;
-		printf("\n---------Thread: %d First Paritioning: k:%d group:%d rem:%d first: %d last: %d------------\n", thread_id, k, group, rem, first, last);
+	
+		new_pend = ps_msg[barr_id].pstart + k1-1;
+		
+		/*
+		if(first == 0) {
+			k2 += k1;
+			new_pend -= (k1-1);
+		} else if(last == 0) {
+			k1 += k2;
+		}
+		*/
+		
+		group1 = k1;
+		rem1   = k1%first;
+
+		group2 = k2/last;
+		rem2   = k2%last;
+		
+		printf("\n---------Thread: %d First Paritioning: k:%d group:%d rem:%d first: %d last: %d------------\n", thread_id, k1, group1, rem1, first, last);
 		printf("loop from: %d to %d\n", barr_id, barr_id+first);
-		int new_pend = ps_msg[barr_id].pstart + k-1;
+		
 		for(i = barr_id, s = 0, e = ps_msg[thread_id].start-1; i < (barr_id+first); i++) {
 			s = e + 1;
-			e = s + group - 1;
-			if(rem > 0) {
-				rem--;
+			e = s + group1 - 1;
+			if(rem1 > 0) {
+				rem1--;
 				e++;
 			}
 			ps_msg[i].pstart = ps_msg[thread_id].pstart;
@@ -247,17 +264,14 @@ void *calcPrefixSum(void* tid) {
 			ps_msg[i].first_thread = ps_msg[thread_id].first_thread;
 			ps_msg[i].last_thread  = ps_msg[thread_id].first_thread+first-1;
 		}
-		k     = prev_end - pivots_indices[barr_id] + 1; 
-		group = (last > 0)?k/last:k;
-		rem   = (last > 0)?k%last:0;
 
-		printf("\n---------Thread: %d Second Paritioning: k:%d group:%d rem:%d first: %d last: %d------------\n", thread_id, k, group, rem, first, last);
+		printf("\n---------Thread: %d Second Paritioning: k:%d group:%d rem:%d first: %d last: %d------------\n", thread_id, k2, group2, rem2, first, last);
 	printf("loop from: %d to %d\n",  barr_id+first,barr_id+first+last);
 		for(i = (barr_id+first); i < (barr_id+first+last); i++) {
 			s = e + 1;
-			e = s + group - 1;
-			if(rem > 0) {
-				rem--;
+			e = s + group2 - 1;
+			if(rem2 > 0) {
+				rem2--;
 				e++;
 			}
 			ps_msg[i].pstart = new_pend+1;
@@ -320,12 +334,17 @@ void *calcPrefixSum(void* tid) {
 		
 		printf("\n--------------------------------------------------------\n\n");
 #endif
-		pthread_barrier_destroy(&cbarr[barr_id]);
-		printf("cbarr: %d %d\n",barr_id, first);
-		pthread_barrier_init(&cbarr[barr_id], NULL, first);
-		pthread_barrier_destroy(&cbarr[barr_id+first]);
-		printf("cbarr: %d %d\n",barr_id+first, last);
-		pthread_barrier_init(&cbarr[barr_id+first], NULL, last);
+
+		if(first != 0) {
+			printf("cbarr: %d %d\n",barr_id, first);
+			pthread_barrier_destroy(&cbarr[barr_id]);
+			pthread_barrier_init(&cbarr[barr_id], NULL, first);
+		}
+		if(last != 0){
+			pthread_barrier_destroy(&cbarr[barr_id+first]);
+			printf("cbarr: %d %d\n",barr_id+first, last);
+			pthread_barrier_init(&cbarr[barr_id+first], NULL, last);
+		}
 		for(i = barr_id+1; i <= prev_lt; i++) {
 			pthread_barrier_wait(&obarr[i]);
 		}
@@ -403,7 +422,7 @@ void spawn_threads(const int len, const int num_threads) {
 int main() {
     srand(time(NULL));
     for(int i = 0; i < INPUT_SIZE; i++) {
-	 input3[i] = check[i] = input1[i] = rand()%INPUT_SIZE;
+	//input3[i] = check[i] = input1[i] = rand()%INPUT_SIZE;
     }
     double sTime, pTime;
     struct timeval tz;
