@@ -8,9 +8,9 @@
 #include <iostream>
 using namespace std;
 
-#define INPUT_SIZE 50
-#define NUM_THREADS 4
-//#define printf(x,...) 
+#define INPUT_SIZE 10000000
+#define NUM_THREADS 8
+#define printf(x,...) 
 
 
 typedef struct {
@@ -30,16 +30,16 @@ int sum1 [NUM_THREADS];
 int sum2 [NUM_THREADS];
 int pivots [NUM_THREADS];
 int pivots_indices [NUM_THREADS];
-//int input1[INPUT_SIZE]={5,6,14,13,12,11,10,9,8,7,1,2,4,3,16,15};
+//int input1[INPUT_SIZE]={205, 618, 792, 409, 514, 208, 98, 98, 795, 72, 604, 819, 632, 514, 81, 540 };
 int input2 [INPUT_SIZE];
-//int input1 [INPUT_SIZE];
+int input1 [INPUT_SIZE];
 int input3 [INPUT_SIZE];
-//int check [INPUT_SIZE];
-//int check[INPUT_SIZE]={5,6,14,13,12,11,10,9,8,7,1,2,4,3,16,15};
+int check [INPUT_SIZE];
+//int check[INPUT_SIZE]={205, 618, 792, 409, 514, 208, 98, 98, 795, 72, 604, 819, 632, 514, 81, 540 };
 
-int check[INPUT_SIZE] = {460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
+//int check[INPUT_SIZE] = {460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
 
-int input1[INPUT_SIZE] ={460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
+//int input1[INPUT_SIZE] ={460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
 
 prefixSumMsg ps_msg[NUM_THREADS];
 
@@ -84,8 +84,7 @@ void *calcPrefixSum(void* tid) {
 
 	while(true) {
 
-	printf("\nThread id: %d pstart: %d pend: %d start: %d end: %d first_thread:%d last_thread: %d\n", ps_msg[thread_id].thread_id, ps_msg[thread_id].pstart, 
-			ps_msg	 [thread_id].pend, ps_msg[thread_id].start, ps_msg[thread_id].end, ps_msg[thread_id].first_thread, ps_msg[thread_id].last_thread);
+	printf("\nThread id: %d pstart: %d pend: %d start: %d end: %d first_thread:%d last_thread: %d\n", ps_msg[thread_id].thread_id, ps_msg[thread_id].pstart, ps_msg[thread_id].pend, ps_msg[thread_id].start, ps_msg[thread_id].end, ps_msg[thread_id].first_thread, ps_msg[thread_id].last_thread);
 
 	barr_id = ps_msg[thread_id].first_thread;
 	
@@ -126,7 +125,7 @@ void *calcPrefixSum(void* tid) {
 			printf("%d ",from[i]);
 		}
 	printf("\n");
-	printf(" waiting on %d \n", barr_id);
+	printf(" Thread %d: waiting on %d \n", thread_id, barr_id);
 	pthread_barrier_wait(&cbarr[barr_id]);
 	
 	if(thread_id == barr_id) {
@@ -146,11 +145,13 @@ void *calcPrefixSum(void* tid) {
 			sum1[i] = psum;
 			psum = s;
 		}
+		pivots_indices[barr_id] = ps_msg[thread_id].pstart + s;
 		printf("Prefix Sum1: ");
 		for(i = barr_id; i <= ps_msg[thread_id].last_thread; i++){
 			printf("%d ",sum1[i]);
 		}
 		printf("\n");
+		
 	} else if(thread_id == ps_msg[thread_id].last_thread) {
 		printf("Before Prefix Sum2: ");
 		for(i = barr_id; i <= ps_msg[thread_id].last_thread; i++){
@@ -167,11 +168,12 @@ void *calcPrefixSum(void* tid) {
 		for(i = barr_id; i <= ps_msg[thread_id].last_thread; i++){
 			printf("%d ",sum2[i]);
 		}
-		printf("\n");
-		printf("Pivot index is : %d\n",pivots_indices[barr_id]);
+		printf("\n");	
+	
 	}
 	pthread_barrier_wait(&cbarr[barr_id]);
 	/* Copy elements to a new array */
+
 	i = ps_msg[thread_id].start;
 	if(thread_id == barr_id) {
 		i++;
@@ -179,9 +181,11 @@ void *calcPrefixSum(void* tid) {
 	}
 	pstart = ps_msg[thread_id].pstart;
 	if(cnt1 != 0) { 
+		printf("c1-Thread: %d copying to pstart:%d+%d from %d elements-%d\n",thread_id, pstart, sum1[thread_id], i,cnt1);
 		memcpy((void*)(to+pstart+(sum1[thread_id])), (void*)(from+i), cnt1*sizeof(int));
 	}
 	if(cnt2 != 0) {
+		printf("c2-Thread: %d copying to pstart:%d+%d from %d elements-%d\n",thread_id, pivots_indices[barr_id]+1, sum2[thread_id], i+cnt1, cnt2);
 		memcpy((void*)(to+pivots_indices[barr_id]+1+sum2[thread_id]),(void*)(from+i+cnt1), cnt2*sizeof(int));
 	}
 	pthread_barrier_wait(&cbarr[barr_id]);
@@ -249,7 +253,7 @@ void *calcPrefixSum(void* tid) {
 		s = kth_smallest(from, ps_msg[barr_id].pstart, new_pend+1,  ps_msg[barr_id].pstart+((new_pend-ps_msg[barr_id].pstart)/2));
 		printf("\n");
 		printf("Adding pivots indices in %d, value: %d\n",barr_id, s);
-		pivots_indices[barr_id] = s;
+		//pivots_indices[barr_id] = s;
 		pivots[barr_id] = t = from[s]; 
 		printf("Adding pivot in %d, value: %d\n",barr_id, t);
 		printf("Swapping %d and %d\n", s , ps_msg[thread_id].pstart);
@@ -265,19 +269,19 @@ void *calcPrefixSum(void* tid) {
 				pivots_indices[barr_id], pivots[first], pivots_indices[first]);
 		*/
 		printf("Finding median from %d to %d at %d\n", new_pend+1 , prev_end+1, new_pend+((prev_end-new_pend)/2));
-		e = kth_smallest(from, new_pend+1, prev_end+1, new_pend+((prev_end-new_pend)/2));
+		e = kth_smallest(from, new_pend+1, prev_end+1, new_pend+1+((prev_end-new_pend)/2));
 		//printf("Median: %d pos: %d\n",from[e], e);
-		printf("After median ");
-		for(i = 0; i < INPUT_SIZE; i++){
+		printf("After median: ");
+		for(i = ps_msg[i].pstart; i < prev_end; i++){
 			printf("%d ",from[i]);
 		}
 		printf("\n");
-		printf("Adding pivots indices in %d, value: %d\n",barr_id+first,e);
-		pivots_indices[barr_id+first] = e;
+		//printf("Adding pivots indices in %d, value: %d\n",barr_id+first,e);
+		//pivots_indices[barr_id+first] = e;
 		pivots[barr_id+first] = t = from[e]; 
 		from[e] = from[new_pend+1];
 		from[new_pend+1] = t;
-		printf("Adding pivot in %d value: %d\n",barr_id+first, t);
+		//printf("Adding pivot in %d value: %d\n",barr_id+first, t);
 		printf("Swapping %d and %d\n", e, new_pend+1);
 		printf("Second Median: %d pos: %d Index: %d\n",pivots[barr_id+first], e, barr_id+first);
 		printf("Input: ");
@@ -289,15 +293,16 @@ void *calcPrefixSum(void* tid) {
 		pthread_barrier_destroy(&cbarr[barr_id]);
 		printf("cbarr: %d %d\n",barr_id, first);
 		pthread_barrier_init(&cbarr[barr_id], NULL, first);
-		pthread_barrier_destroy(&cbarr[first]);
-		printf("cbarr: %d %d\n",first, last);
-		pthread_barrier_init(&cbarr[first], NULL, last);
+		pthread_barrier_destroy(&cbarr[barr_id+first]);
+		printf("cbarr: %d %d\n",barr_id+first, last);
+		pthread_barrier_init(&cbarr[barr_id+first], NULL, last);
 		for(i = barr_id+1; i <= prev_lt; i++) {
 			pthread_barrier_wait(&obarr[i]);
 		}
 		printf("Thread id: %d Master thread done !!\n", thread_id);
 	} else {
 		pthread_barrier_wait(&obarr[thread_id]);
+		printf("Thread %d done with a level\n",thread_id);
 	  }
 
 	}
@@ -323,7 +328,7 @@ void spawn_threads(const int len, const int num_threads) {
 	
 	i = kth_smallest(input1, 0, INPUT_SIZE, INPUT_SIZE/2);
 	pivots[0] = input1[i];	
-	pivots_indices[0] = i;
+	
 	printf("Median: %d pos: %d\n",input1[i], i);
 	printf("After median ");
 	for(int i = 0; i < INPUT_SIZE; i++){
@@ -368,7 +373,7 @@ void spawn_threads(const int len, const int num_threads) {
 int main() {
     srand(time(NULL));
     for(int i = 0; i < INPUT_SIZE; i++) {
-	// input3[i] = check[i] = input1[i] = rand()%1000;
+	 input3[i] = check[i] = input1[i] = rand()%1000;
     }
     double sTime, pTime;
     struct timeval tz;
@@ -391,34 +396,47 @@ int main() {
 */
     gettimeofday(&tz, &tx);
     start_time = (double)tz.tv_sec + (double) tz.tv_usec / 1000000.0;
-
+	qsort(check, INPUT_SIZE, sizeof(int),comp); 
      gettimeofday(&tz, &tx);
     end_time = (double)tz.tv_sec + (double) tz.tv_usec / 1000000.0;
     sTime = end_time-start_time;
     printf("Serial Time: time_s - %lf\n", sTime);
-    qsort(check, INPUT_SIZE, sizeof(int),comp);
+    
  //   for(int i=0;i<INPUT_SIZE;i++)
 //	  	printf("%d %d\n", input1[i], input2[i]);
     for(int i=0;i<INPUT_SIZE;i++){
 			//printf("%d %d\n", input1[i], check[i]);
 			if(input1[i] != check[i]) {
-			  cout<<"fail\nInput:\n";
-		/*	  for(int k = 0; k < INPUT_SIZE; k++)
+			  cout<<"FAIL?????????????????????????????\nInput:\n";
+			  for(int k = 0; k < INPUT_SIZE; k++)
 				cout<<input3[k]<<" ";
 			 cout<<"\n";
-		*/	
-			  cout<<"Ouput:\n";
+			/*
+			  cout<<"Ouput1:\n";
 			  for(int k = 0; k < INPUT_SIZE; k++)
 					cout<<input1[k]<<", ";
 			cout<<"\n";
+			 cout<<"Ouput2:\n";
+			  for(int k = 0; k < INPUT_SIZE; k++)
+					cout<<input2[k]<<", ";
+			cout<<"\n";
 			cout<<"Expected answer:\n";
 			for(int k = 0; k < INPUT_SIZE; k++)
-					cout<<check[k]<<", ";
+					cout<<check[k]<<", ";*/
 			  break;
 			}
     }
     printf("\n");
-    printf("Speedup: %lf\n",(double)sTime/pTime);
+    cout<<"Speedup: "<<(double)sTime/pTime<<"\n";
 	
+	/*cout<<"Ouput:\n";
+			  for(int k = 0; k < INPUT_SIZE; k++)
+					cout<<input2[k]<<", ";
+			cout<<"\n";
+			cout<<"Expected answer:\n";
+			for(int k = 0; k < INPUT_SIZE; k++)
+					cout<<check[k]<<", ";
+							cout<<"\n";
+							*/
     return EXIT_SUCCESS;
 }
