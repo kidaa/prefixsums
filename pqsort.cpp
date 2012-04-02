@@ -9,7 +9,7 @@
 #include <iostream>
 using namespace std;
 
-#define INPUT_SIZE 1000
+#define INPUT_SIZE 10000000
 #define NUM_THREADS 4
 #define printf(x,...) 
 #define DEBUG
@@ -25,23 +25,20 @@ typedef struct {
 } prefixSumMsg;
 
 pthread_barrier_t cbarr[NUM_THREADS], obarr[NUM_THREADS];
-//int input [INPUT_SIZE];
-//int check [INPUT_SIZE];
+pthread_t threads[NUM_THREADS];
+
 int sum1 [NUM_THREADS];
 int sum2 [NUM_THREADS];
 int pivots [NUM_THREADS];
 int pivots_indices [NUM_THREADS];
-int input1[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
-int check[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
+//int input1[INPUT_SIZE]={1, 2, 3, 1};
+//int check[INPUT_SIZE]={1, 2, 3, 1};
+//int check[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
 int input2 [INPUT_SIZE];
-//int input1 [INPUT_SIZE];
+int input1 [INPUT_SIZE];
 int input3 [INPUT_SIZE];
-//int check [INPUT_SIZE];
-//int check[INPUT_SIZE]={205, 618, 792, 409, 514, 208, 98, 98, 795, 72, 604, 819, 632, 514, 81, 540 };
+int check [INPUT_SIZE];
 
-//int check[INPUT_SIZE] = {460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
-
-//int input1[INPUT_SIZE] ={460 ,647, 810 ,575 ,916 ,672, 890 ,672 ,87 ,375 ,713 ,73 ,112 ,331 ,67 ,227 ,345 ,935 ,826 ,355 ,579 ,228 ,330 ,339 ,157 ,726 ,554 ,121 ,22 ,217, 618, 835, 864, 429, 762 ,132, 453, 652 ,156, 540, 28 ,222 ,966, 140, 553, 33, 720 ,251 ,321, 898};
 
 prefixSumMsg ps_msg[NUM_THREADS];
 
@@ -99,6 +96,7 @@ void *calcPrefixSum(void* tid) {
 	if(barr_id == ps_msg[thread_id].last_thread) {
 		printf("\n\nThread %d: RETURNED\n\n", thread_id);
 		qsort(from+ps_msg[thread_id].pstart, ps_msg[thread_id].pend-ps_msg[thread_id].pstart+1, sizeof(int), comp);
+		if(from == input1)
 		memcpy((void*)(to+ps_msg[thread_id].pstart), (void*)(from+ps_msg[thread_id].pstart), (ps_msg[thread_id].pend-ps_msg[thread_id].pstart+1)*sizeof(int));
 		return NULL;
 	}
@@ -200,11 +198,11 @@ void *calcPrefixSum(void* tid) {
 	}
 	pstart = ps_msg[thread_id].pstart;
 	if(cnt1 != 0) { 
-		printf("c1-Thread: %d copying to pstart:%d+%d from %d elements-%d\n",thread_id, pstart, sum1[thread_id], i,cnt1);
+		printf("c1-Thread: %d copying to pstart:%d+%d from %d elements-%d to %d\n",thread_id, pstart, sum1[thread_id], i,cnt1, pstart+sum1[thread_id]);
 		memcpy((void*)(to+pstart+(sum1[thread_id])), (void*)(from+i), cnt1*sizeof(int));
 	}
 	if(cnt2 != 0) {
-		printf("c2-Thread: %d copying to pstart:%d+%d from %d elements-%d\n",thread_id, pivots_indices[barr_id]+1, sum2[thread_id], i+cnt1, cnt2);
+		printf("c2-Thread: %d copying to pstart:%d+%d from %d elements-%d to %d\n",thread_id, pivots_indices[barr_id]+1, sum2[thread_id], i+cnt1, cnt2, pivots_indices[barr_id]+1+sum2[thread_id]);
 		memcpy((void*)(to+pivots_indices[barr_id]+1+sum2[thread_id]),(void*)(from+i+cnt1), cnt2*sizeof(int));
 	}
 	pthread_barrier_wait(&cbarr[barr_id]);
@@ -214,6 +212,11 @@ void *calcPrefixSum(void* tid) {
 	to   = tp;
 
 	if(thread_id == barr_id) {
+		if(from != input1) {
+			printf("Adding pivot: %d to %d\n",pivots[barr_id], pivots_indices[barr_id]);
+			to[pivots_indices[barr_id]] = pivots[barr_id];
+		}
+		
 		prev_end = ps_msg[thread_id].pend;
 		prev_lt  = ps_msg[thread_id].last_thread;
 #ifndef DEBUG
@@ -225,23 +228,15 @@ void *calcPrefixSum(void* tid) {
 #endif
 		num_threads = ps_msg[thread_id].last_thread - barr_id + 1;
 		k1     = pivots_indices[barr_id] - ps_msg[thread_id].start; 
-		k2     = prev_end - pivots_indices[barr_id] + 1; 
+		k1 = (k1 == 0)? 1 : k1;
+		k2     = prev_end - pivots_indices[barr_id]; 
 		first = ((double)k1/(double)(k1+k2))*num_threads;
 		first = (first == 0)?1:first;
 		last  = num_threads - first;
 	
 		new_pend = ps_msg[barr_id].pstart + k1-1;
-		
-		/*
-		if(first == 0) {
-			k2 += k1;
-			new_pend -= (k1-1);
-		} else if(last == 0) {
-			k1 += k2;
-		}
-		*/
-		
-		group1 = k1;
+
+		group1 = k1/first;
 		rem1   = k1%first;
 
 		group2 = k2/last;
@@ -267,14 +262,14 @@ void *calcPrefixSum(void* tid) {
 
 		printf("\n---------Thread: %d Second Paritioning: k:%d group:%d rem:%d first: %d last: %d------------\n", thread_id, k2, group2, rem2, first, last);
 	printf("loop from: %d to %d\n",  barr_id+first,barr_id+first+last);
-		for(i = (barr_id+first); i < (barr_id+first+last); i++) {
+		for(i = (barr_id+first), e = pivots_indices[barr_id]; i < (barr_id+first+last); i++) {
 			s = e + 1;
 			e = s + group2 - 1;
 			if(rem2 > 0) {
 				rem2--;
 				e++;
 			}
-			ps_msg[i].pstart = new_pend+1;
+			ps_msg[i].pstart = pivots_indices[barr_id]+1;
 			ps_msg[i].pend   = prev_end;
 			ps_msg[i].start = s;
 			ps_msg[i].end   = e;
@@ -282,6 +277,22 @@ void *calcPrefixSum(void* tid) {
 			ps_msg[i].last_thread  = ps_msg[thread_id].first_thread+first+last-1;
 		}
 
+		if((ps_msg[barr_id].pend-ps_msg[barr_id].pstart) < (ps_msg[barr_id].last_thread-ps_msg[barr_id].first_thread)) {
+			ps_msg[barr_id].last_thread = ps_msg[barr_id].first_thread;
+			for(i = barr_id + 1; i < (barr_id+first); i++) {
+				printf("a)Thread %d : Cancelled thread %d\n",thread_id, i);
+				pthread_cancel(threads[i]);
+			}
+		}
+		
+		if((ps_msg[barr_id+first].pend-ps_msg[barr_id+first].pstart) < (ps_msg[barr_id+first].last_thread-ps_msg[barr_id+first].first_thread)) {
+			ps_msg[barr_id+first].last_thread = ps_msg[barr_id+first].first_thread;
+			for(i = barr_id + first+1; i < barr_id+first+last; i++) {
+				printf("b)Thread %d : Cancelled thread %d\n",thread_id, i);
+				pthread_cancel(threads[i]);
+			}
+		}
+		
 #ifndef DEBUG
 		for(i = 0; i < NUM_THREADS; i++) {
 			printf("Thread id: %d pstart: %d pend: %d start: %d end: %d first_thread:%d last_thread: %d\n", ps_msg[i].thread_id, ps_msg[i].pstart, ps_msg[i].pend, ps_msg[i].start, ps_msg[i].end, ps_msg[i].first_thread, ps_msg[i].last_thread);
@@ -291,41 +302,33 @@ void *calcPrefixSum(void* tid) {
 #endif
 		s = kth_smallest(from, ps_msg[barr_id].pstart, new_pend+1,  ps_msg[barr_id].pstart+((new_pend-ps_msg[barr_id].pstart)/2));
 		printf("\n");
-		printf("Adding pivots indices in %d, value: %d\n",barr_id, s);
-		//pivots_indices[barr_id] = s;
-		pivots[barr_id] = t = from[s]; 
-		printf("Adding pivot in %d, value: %d\n",barr_id, t);
-		printf("Swapping %d and %d\n", s , ps_msg[thread_id].pstart);
+		
+		pivots[barr_id] = t = from[s];
 		from[s] = from[ps_msg[thread_id].pstart];
 		from[ps_msg[thread_id].pstart] = t;
+		printf("Adding pivot in %d, value: %d\n",barr_id, t);
+		printf("Swapping %d and %d\n", s , ps_msg[thread_id].pstart);
+
 		printf("First Median: %d pos: %d Index: %d\n",pivots[barr_id], s, barr_id);
-		/*
-		pivots_indices[barr_id] = ps_msg[thread_id].pstart;
-		pivots[barr_id] = from[ps_msg[thread_id].pstart];
-		pivots_indices[first] = ps_msg[first].pstart;
-		pivots[first] = from[ps_msg[first].pstart];
-		printf("Pivot for barr_id: %d in %d, first: %d in %d\n", pivots[barr_id],
-				pivots_indices[barr_id], pivots[first], pivots_indices[first]);
-		*/
-		printf("Finding median from %d to %d at %d\n", new_pend+1 , prev_end+1, new_pend+((prev_end-new_pend)/2));
-		e = kth_smallest(from, new_pend+1, prev_end+1, new_pend+1+((prev_end-new_pend)/2));
+	
+		printf("Finding median from %d to %d at %d\n", pivots_indices[barr_id]+1 , prev_end+1, pivots_indices[barr_id]+1+((prev_end-pivots_indices[barr_id]-1)/2));
+		e = kth_smallest(from, pivots_indices[barr_id]+1, prev_end+1, pivots_indices[barr_id]+1+((prev_end-pivots_indices[barr_id]-1)/2));
 		//printf("Median: %d pos: %d\n",from[e], e);
 
 #ifndef DEBUG
 		printf("After median: ");
-		for(i = ps_msg[i].pstart; i < prev_end; i++){
+		for(i = ps_msg[i].pstart; i <= prev_end; i++){
 			printf("%d ",from[i]);
 		}
 		printf("\n");
 #endif
-		//printf("Adding pivots indices in %d, value: %d\n",barr_id+first,e);
-		//pivots_indices[barr_id+first] = e;
+
 		pivots[barr_id+first] = t = from[e]; 
-		from[e] = from[new_pend+1];
-		from[new_pend+1] = t;
+		from[e] = from[pivots_indices[barr_id]+1];
+		from[pivots_indices[barr_id]+1] = t;
 		//printf("Adding pivot in %d value: %d\n",barr_id+first, t);
 #ifndef DEBUG
-		printf("Swapping %d and %d\n", e, new_pend+1);
+		printf("Swapping %d and %d\n", e, pivots_indices[barr_id]+1);
 		printf("Second Median: %d pos: %d Index: %d\n",pivots[barr_id+first], e, barr_id+first);
 		printf("Input: ");
 		for(i = 0; i < INPUT_SIZE; i++){
@@ -335,16 +338,12 @@ void *calcPrefixSum(void* tid) {
 		printf("\n--------------------------------------------------------\n\n");
 #endif
 
-		if(first != 0) {
-			printf("cbarr: %d %d\n",barr_id, first);
-			pthread_barrier_destroy(&cbarr[barr_id]);
-			pthread_barrier_init(&cbarr[barr_id], NULL, first);
-		}
-		if(last != 0){
-			pthread_barrier_destroy(&cbarr[barr_id+first]);
-			printf("cbarr: %d %d\n",barr_id+first, last);
-			pthread_barrier_init(&cbarr[barr_id+first], NULL, last);
-		}
+		printf("cbarr: %d %d\n",barr_id, first);
+		pthread_barrier_destroy(&cbarr[barr_id]);
+		pthread_barrier_init(&cbarr[barr_id], NULL, first);
+		pthread_barrier_destroy(&cbarr[barr_id+first]);
+		printf("cbarr: %d %d\n",barr_id+first, last);
+		pthread_barrier_init(&cbarr[barr_id+first], NULL, last);
 		for(i = barr_id+1; i <= prev_lt; i++) {
 			pthread_barrier_wait(&obarr[i]);
 		}
@@ -360,7 +359,6 @@ void *calcPrefixSum(void* tid) {
 
 
 void spawn_threads(const int len, const int num_threads) {
-	pthread_t threads[NUM_THREADS];
 	int i, t;
 	for(i = 0; i < NUM_THREADS; i++) {
 		pthread_barrier_init(&cbarr[i], NULL, NUM_THREADS);
@@ -460,7 +458,7 @@ int main() {
 			  for(int k = 0; k < INPUT_SIZE; k++)
 				cout<<input3[k]<<" ";
 			 cout<<"\n";
-			/*
+			
 			  cout<<"Ouput1:\n";
 			  for(int k = 0; k < INPUT_SIZE; k++)
 					cout<<input1[k]<<", ";
@@ -468,7 +466,7 @@ int main() {
 			 cout<<"Ouput2:\n";
 			  for(int k = 0; k < INPUT_SIZE; k++)
 					cout<<input2[k]<<", ";
-			cout<<"\n";
+			cout<<"\n"; /*
 			cout<<"Expected answer:\n";
 			for(int k = 0; k < INPUT_SIZE; k++)
 					cout<<check[k]<<", ";*/
