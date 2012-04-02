@@ -9,10 +9,10 @@
 #include <iostream>
 using namespace std;
 
-#define INPUT_SIZE 100
-#define NUM_THREADS 6
-//#define printf(x,...) 
-//#define DEBUG
+#define INPUT_SIZE 10000000
+#define NUM_THREADS 4
+#define printf(x,...) 
+#define DEBUG
 
 typedef struct {
 	int thread_id;
@@ -208,7 +208,7 @@ void *calcPrefixSum(void* tid) {
 
 	if(thread_id == barr_id) {
 		
-		to[pivots_indices[barr_id]] = pivots[barr_id];
+//		to[pivots_indices[barr_id]] = pivots[barr_id];
 			
 		prev_end = ps_msg[thread_id].pend;
 		prev_lt  = ps_msg[thread_id].last_thread;
