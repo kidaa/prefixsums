@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <climits>
 #include <sys/time.h>
 
 #include <iostream>
@@ -33,13 +31,13 @@ int sum2 [NUM_THREADS];
 int medians [NUM_THREADS];
 int pivots [NUM_THREADS];
 int pivots_indices [NUM_THREADS];
-int input1[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
+//int input1[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
 //int check[INPUT_SIZE]={1, 2, 3, 1};
-int check[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
+//int check[INPUT_SIZE]={2, 3, 5, 5, 7, 6, 1, 7};
 int input2 [INPUT_SIZE];
-//int input1 [INPUT_SIZE];
+int input1 [INPUT_SIZE];
 int input3 [INPUT_SIZE];
-//int check [INPUT_SIZE];
+int check [INPUT_SIZE];
 
 
 prefixSumMsg ps_msg[NUM_THREADS];
@@ -219,8 +217,6 @@ void *calcPrefixSum(void* tid) {
 
 	if(thread_id == barr_id) {
 		
-		//to[pivots_indices[barr_id]] = pivots[barr_id];
-			
 		prev_end = ps_msg[thread_id].pend;
 		prev_lt  = ps_msg[thread_id].last_thread;
 #ifndef DEBUG
@@ -232,9 +228,8 @@ void *calcPrefixSum(void* tid) {
 #endif
 		num_threads = ps_msg[thread_id].last_thread - barr_id + 1;
 		k1     = pivots_indices[barr_id] - ps_msg[thread_id].start; 
-		//k1     = (k1 == 0)? 1 : k1;
 		k2     = prev_end - pivots_indices[barr_id] + 1; 
-		first  = ((double)k1/(double)(k1+k2))*num_threads;
+		first  = ((double)k1/(k1+k2))*num_threads;
 		first  = (first == 0)?1:first;
 		last   = num_threads - first;
 	
@@ -409,7 +404,7 @@ void spawn_threads(const int len, const int num_threads) {
 int main() {
     srand(time(NULL));
     for(int i = 0; i < INPUT_SIZE; i++) {
-	//input3[i] = check[i] = input1[i] = rand()%INT_MAX;
+	input3[i] = check[i] = input1[i] = rand()%INPUT_SIZE;
     }
     double sTime, pTime;
     struct timeval tz;
@@ -424,12 +419,7 @@ int main() {
     end_time = (double)tz.tv_sec + (double) tz.tv_usec / 1000000.0;
     pTime = end_time-start_time;
     cout<<"Parallel Time: time_p "<< pTime<<"\n";
-/*
-	for(int i = 0; i < sumLimit; i++){
-		printf("%d ",sum[i]);
-	}
-	printf("\n");
-*/
+    
     gettimeofday(&tz, &tx);
     start_time = (double)tz.tv_sec + (double) tz.tv_usec / 1000000.0;
 	qsort(check, INPUT_SIZE, sizeof(int),comp); 
@@ -438,8 +428,6 @@ int main() {
     sTime = end_time-start_time;
    cout<<"Serial Time: time_s "<< sTime<<"\n";
     
- //   for(int i=0;i<INPUT_SIZE;i++)
-//	  	printf("%d %d\n", input1[i], input2[i]);
     for(int i=0;i<INPUT_SIZE;i++){
 			//printf("%d %d\n", input1[i], check[i]);
 			if(input1[i] != check[i]) {
