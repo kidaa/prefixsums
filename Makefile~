@@ -1,15 +1,15 @@
-CC = g++
-CFLAGS = -g
+CC = gcc
+CFLAGS = -c -lm
 OFLAGS = -lpthread
 
 all: prefixsum
 	  
 prefixsum: 
-	@$(CC) $(CFLAGS) $(OFLAGS) prefixSum.cpp -o prefixSum
-	@$(CC) $(CFLAGS) $(OFLAGS) prefixSumO.cpp -o prefixSumO
-	@$(CC) $(CFLAGS) $(OFLAGS) prefixSumS.cpp -o prefixSumS
-	@$(CC) $(CFLAGS) $(OFLAGS) pqsort.cpp -o pqsort
-	@$(CC) $(CFLAGS) $(OFLAGS) sprefixSum.c -o sprefixSum
+	#@$(CC) $(CFLAGS) $(OFLAGS) prefixSum.cpp -o prefixSum
+	#@$(CC) $(CFLAGS) $(OFLAGS) prefixSumO.cpp -o prefixSumO
+	#@$(CC) $(CFLAGS) $(OFLAGS) prefixSumS.cpp -o prefixSumS
+	@$(CC) $(CFLAGS) $(OFLAGS) pqsort.c -o pqsort
+	#@$(CC) $(CFLAGS) $(OFLAGS) sprefixSum.c -o sprefixSum
 
 clean: 
-	@rm prefixSum.o sprefixSum.o pqsort.o
+	@rm prefixSumS.o prefixSumO.o prefixSum.o sprefixSum.o pqsort.o

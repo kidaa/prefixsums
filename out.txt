@@ -1,153 +1,300 @@
-Input: 1 2 3 1 
-Median: 2 pos: 2
-After median 1 1 2 3 
-2 1 1 3 
-
-Thread id: 0 pstart: 0 pend: 3 start: 0 end: 0 first_thread:0 last_thread: 3
-Start: Thread 0: barr_id: 0 loop from 0 to 0
-I am the start thread: 0 incrementing index: 1
-
-Local Rearragement on thread: 0 cnt1: 0 cnt2: 0
-2 
- Thread 0: waiting on 0 
-
-Thread id: 3 pstart: 0 pend: 3 start: 3 end: 3 first_thread:0 last_thread: 3
-Start: Thread 3: barr_id: 0 loop from 3 to 3
-
-Local Rearragement on thread: 3 cnt1: 0 cnt2: 1
-3 
- Thread 3: waiting on 0 
-
-Thread id: 1 pstart: 0 pend: 3 start: 1 end: 1 first_thread:0 last_thread: 3
-Start: Thread 1: barr_id: 0 loop from 1 to 1
-
-Local Rearragement on thread: 1 cnt1: 1 cnt2: 0
-1 
- Thread 1: waiting on 0 
-
-Thread id: 2 pstart: 0 pend: 3 start: 2 end: 2 first_thread:0 last_thread: 3
-Start: Thread 2: barr_id: 0 loop from 2 to 2
-
-Local Rearragement on thread: 2 cnt1: 1 cnt2: 0
-1 
- Thread 2: waiting on 0 
-
-Total Local Rearragement on 0 cnt1: 0 cnt2: 0: 
-Before Prefix Sum2: 2 0 1 1 3 
-0 Before Prefix Sum1: 0 0 1 1 
-Prefix Sum2: 0 0 0 0 
-1 0 
-Prefix Sum1: 0 0 1 2 
-c2-Thread: 3 copying to pstart:3+0 from 3 elements-1
-c1-Thread: 2 copying to pstart:0+1 from 2 elements-1
-c1-Thread: 1 copying to pstart:0+0 from 1 elements-1
-Final: 1 2 2 3 
-
----------Thread: 0 First Paritioning: k:2 group:1 rem:0 first: 2 last: 2------------
-loop from: 0 to 2
-
----------Thread: 0 Second Paritioning: k:1 group:0 rem:1 first: 2 last: 2------------
-loop from: 2 to 4
-b)Thread 0 : Cancelled thread 3
-Thread id: 0 pstart: 0 pend: 1 start: 0 end: 0 first_thread:0 last_thread: 1
-Thread id: 1 pstart: 0 pend: 1 start: 1 end: 1 first_thread:0 last_thread: 1
-Thread id: 2 pstart: 3 pend: 3 start: 3 end: 3 first_thread:2 last_thread: 2
-Thread id: 3 pstart: 3 pend: 3 start: 4 end: 3 first_thread:2 last_thread: 3
-Finding median from 0 to 2 at 0
-
-Adding pivot in 0, value: 1
-Swapping 0 and 0
-First Median: 1 pos: 0 Index: 0
-Finding median from 3 to 4 at 3
-After median: 1 2 2 3 
-Swapping 3 and 3
-Second Median: 3 pos: 3 Index: 2
-Input: 1 2 2 3 
---------------------------------------------------------
-
-cbarr: 0 2
-cbarr: 2 2
-Thread id: 0 Master thread done !!
-
-Thread id: 0 pstart: 0 pend: 1 start: 0 end: 0 first_thread:0 last_thread: 1
-Start: Thread 0: barr_id: 0 loop from 0 to 0
-I am the start thread: 0 incrementing index: 1
-
-Local Rearragement on thread: 0 cnt1: 0 cnt2: 0
-1 
- Thread 0: waiting on 0 
-Thread 2 done with a level
-
-Thread id: 2 pstart: 3 pend: 3 start: 3 end: 3 first_thread:2 last_thread: 2
-
-
-Thread 2: RETURNED
-
-Thread 1 done with a level
-
-Thread id: 1 pstart: 0 pend: 1 start: 1 end: 1 first_thread:0 last_thread: 1
-Start: Thread 1: barr_id: 0 loop from 1 to 1
-
-Local Rearragement on thread: 1 cnt1: 0 cnt2: 1
-2 
- Thread 1: waiting on 0 
-Thread 3 done with a level
-
-Total Local Rearragement on 0 cnt1: 0 cnt2: 0: 
-1 2 
-Before Prefix Sum1: 0 0 
-Prefix Sum1: 0 0 
-Before Prefix Sum2: 0 1 
-Prefix Sum2: 0 0 
-c2-Thread: 1 copying to pstart:1+0 from 1 elements-1
-Final: 1 2 
-
----------Thread: 0 First Paritioning: k:1 group:1 rem:0 first: 1 last: 1------------
-loop from: 0 to 1
-
----------Thread: 0 Second Paritioning: k:1 group:1 rem:0 first: 1 last: 1------------
-loop from: 1 to 2
-Thread id: 0 pstart: 0 pend: 0 start: 0 end: 0 first_thread:0 last_thread: 0
-Thread id: 1 pstart: 1 pend: 1 start: 1 end: 1 first_thread:1 last_thread: 1
-Thread id: 2 pstart: 3 pend: 3 start: 3 end: 3 first_thread:2 last_thread: 2
-Thread id: 3 pstart: 3 pend: 3 start: 4 end: 3 first_thread:2 last_thread: 3
-Finding median from 0 to 1 at 0
-
-Adding pivot in 0, value: 1
-Swapping 0 and 0
-First Median: 1 pos: 0 Index: 0
-Finding median from 1 to 2 at 1
-After median: 1 2 
-Swapping 1 and 1
-Second Median: 2 pos: 1 Index: 1
-Input: 1 2 2 3 
---------------------------------------------------------
-
-cbarr: 0 1
-cbarr: 1 1
-Thread id: 0 Master thread done !!
-
-Thread id: 0 pstart: 0 pend: 0 start: 0 end: 0 first_thread:0 last_thread: 0
-
-
-Thread 0: RETURNED
-
-Thread 1 done with a level
-
-Thread id: 1 pstart: 1 pend: 1 start: 1 end: 1 first_thread:1 last_thread: 1
-
-
-Thread 1: RETURNED
-
-Parallel Time: time_p 0.00215697
-Serial Time: time_s 1.90735e-06
-FAIL?????????????????????????????
-Input:
-0 0 0 0 
-Ouput1:
-1, 2, 2, 3, 
-Ouput2:
-1, 2, 2, 3, 
-
-Speedup: 0.000884271
-
+Parallel Time: time_p 1.129309
+Speedup: 3.541988
+============= SORTED ===========
+Parallel Time: time_p 1.099492
+Speedup: 3.638044
+============= SORTED ===========
+Parallel Time: time_p 1.113591
+Speedup: 3.591983
+============= SORTED ===========
+Parallel Time: time_p 1.107877
+Speedup: 3.610510
+============= SORTED ===========
+Parallel Time: time_p 1.122105
+Speedup: 3.564728
+============= SORTED ===========
+Parallel Time: time_p 1.076785
+Speedup: 3.714763
+============= SORTED ===========
+Parallel Time: time_p 1.105072
+Speedup: 3.619674
+============= SORTED ===========
+Parallel Time: time_p 1.078204
+Speedup: 3.709873
+============= SORTED ===========
+Parallel Time: time_p 1.094115
+Speedup: 3.655923
+============= SORTED ===========
+Parallel Time: time_p 1.108104
+Speedup: 3.609769
+============= SORTED ===========
+Parallel Time: time_p 1.058405
+Speedup: 3.779272
+============= SORTED ===========
+Parallel Time: time_p 1.106804
+Speedup: 3.614009
+============= SORTED ===========
+Parallel Time: time_p 1.124202
+Speedup: 3.558080
+============= SORTED ===========
+Parallel Time: time_p 1.092461
+Speedup: 3.661458
+============= SORTED ===========
+Parallel Time: time_p 1.117078
+Speedup: 3.580770
+============= SORTED ===========
+Parallel Time: time_p 1.082410
+Speedup: 3.695457
+============= SORTED ===========
+Parallel Time: time_p 1.094436
+Speedup: 3.654851
+============= SORTED ===========
+Parallel Time: time_p 1.091298
+Speedup: 3.665360
+============= SORTED ===========
+Parallel Time: time_p 1.066541
+Speedup: 3.750442
+============= SORTED ===========
+Parallel Time: time_p 1.071717
+Speedup: 3.732329
+============= SORTED ===========
+Parallel Time: time_p 1.100653
+Speedup: 3.634206
+============= SORTED ===========
+Parallel Time: time_p 1.093071
+Speedup: 3.659415
+============= SORTED ===========
+Parallel Time: time_p 1.101320
+Speedup: 3.632005
+============= SORTED ===========
+Parallel Time: time_p 1.062889
+Speedup: 3.763328
+============= SORTED ===========
+Parallel Time: time_p 1.106064
+Speedup: 3.616427
+============= SORTED ===========
+Parallel Time: time_p 1.105822
+Speedup: 3.617218
+============= SORTED ===========
+Parallel Time: time_p 1.082252
+Speedup: 3.695997
+============= SORTED ===========
+Parallel Time: time_p 1.064762
+Speedup: 3.756708
+============= SORTED ===========
+Parallel Time: time_p 1.110418
+Speedup: 3.602247
+============= SORTED ===========
+Parallel Time: time_p 1.076915
+Speedup: 3.714313
+============= SORTED ===========
+Parallel Time: time_p 1.072767
+Speedup: 3.728675
+============= SORTED ===========
+Parallel Time: time_p 1.067293
+Speedup: 3.747800
+============= SORTED ===========
+Parallel Time: time_p 1.095144
+Speedup: 3.652488
+============= SORTED ===========
+Parallel Time: time_p 1.078311
+Speedup: 3.709505
+============= SORTED ===========
+Parallel Time: time_p 1.085267
+Speedup: 3.685730
+============= SORTED ===========
+Parallel Time: time_p 1.115111
+Speedup: 3.587086
+============= SORTED ===========
+Parallel Time: time_p 1.105905
+Speedup: 3.616948
+============= SORTED ===========
+Parallel Time: time_p 1.070849
+Speedup: 3.735353
+============= SORTED ===========
+Parallel Time: time_p 1.096474
+Speedup: 3.648058
+============= SORTED ===========
+Parallel Time: time_p 1.107136
+Speedup: 3.612926
+============= SORTED ===========
+Parallel Time: time_p 1.105182
+Speedup: 3.619314
+============= SORTED ===========
+Parallel Time: time_p 1.106930
+Speedup: 3.613598
+============= SORTED ===========
+Parallel Time: time_p 1.113224
+Speedup: 3.593167
+============= SORTED ===========
+Parallel Time: time_p 1.069722
+Speedup: 3.739289
+============= SORTED ===========
+Parallel Time: time_p 1.056948
+Speedup: 3.784481
+============= SORTED ===========
+Parallel Time: time_p 1.092354
+Speedup: 3.661816
+============= SORTED ===========
+Parallel Time: time_p 1.091087
+Speedup: 3.666068
+============= SORTED ===========
+Parallel Time: time_p 1.080155
+Speedup: 3.703173
+============= SORTED ===========
+Parallel Time: time_p 1.110317
+Speedup: 3.602575
+============= SORTED ===========
+Parallel Time: time_p 1.106415
+Speedup: 3.615281
+============= SORTED ===========
+Parallel Time: time_p 1.116181
+Speedup: 3.583648
+============= SORTED ===========
+Parallel Time: time_p 1.132614
+Speedup: 3.531654
+============= SORTED ===========
+Parallel Time: time_p 1.094746
+Speedup: 3.653815
+============= SORTED ===========
+Parallel Time: time_p 1.120793
+Speedup: 3.568902
+============= SORTED ===========
+Parallel Time: time_p 1.091581
+Speedup: 3.664410
+============= SORTED ===========
+Parallel Time: time_p 1.115803
+Speedup: 3.584862
+============= SORTED ===========
+Parallel Time: time_p 1.132446
+Speedup: 3.532177
+============= SORTED ===========
+Parallel Time: time_p 1.073836
+Speedup: 3.724964
+============= SORTED ===========
+Parallel Time: time_p 1.071478
+Speedup: 3.733161
+============= SORTED ===========
+Parallel Time: time_p 1.094112
+Speedup: 3.655933
+============= SORTED ===========
+Parallel Time: time_p 1.123811
+Speedup: 3.559317
+============= SORTED ===========
+Parallel Time: time_p 1.073214
+Speedup: 3.727122
+============= SORTED ===========
+Parallel Time: time_p 1.109640
+Speedup: 3.604772
+============= SORTED ===========
+Parallel Time: time_p 1.105118
+Speedup: 3.619524
+============= SORTED ===========
+Parallel Time: time_p 1.106184
+Speedup: 3.616035
+============= SORTED ===========
+Parallel Time: time_p 1.102758
+Speedup: 3.627269
+============= SORTED ===========
+Parallel Time: time_p 1.083644
+Speedup: 3.691249
+============= SORTED ===========
+Parallel Time: time_p 1.104737
+Speedup: 3.620771
+============= SORTED ===========
+Parallel Time: time_p 1.069329
+Speedup: 3.740663
+============= SORTED ===========
+Parallel Time: time_p 1.084620
+Speedup: 3.687928
+============= SORTED ===========
+Parallel Time: time_p 1.101416
+Speedup: 3.631689
+============= SORTED ===========
+Parallel Time: time_p 1.092069
+Speedup: 3.662772
+============= SORTED ===========
+Parallel Time: time_p 1.079609
+Speedup: 3.705045
+============= SORTED ===========
+Parallel Time: time_p 1.123106
+Speedup: 3.561552
+============= SORTED ===========
+Parallel Time: time_p 1.074200
+Speedup: 3.723702
+============= SORTED ===========
+Parallel Time: time_p 1.118345
+Speedup: 3.576714
+============= SORTED ===========
+Parallel Time: time_p 1.117471
+Speedup: 3.579511
+============= SORTED ===========
+Parallel Time: time_p 1.112673
+Speedup: 3.594946
+============= SORTED ===========
+Parallel Time: time_p 1.117970
+Speedup: 3.577914
+============= SORTED ===========
+Parallel Time: time_p 1.091515
+Speedup: 3.664631
+============= SORTED ===========
+Parallel Time: time_p 1.068500
+Speedup: 3.743566
+============= SORTED ===========
+Parallel Time: time_p 1.084582
+Speedup: 3.688056
+============= SORTED ===========
+Parallel Time: time_p 1.114666
+Speedup: 3.588519
+============= SORTED ===========
+Parallel Time: time_p 1.085841
+Speedup: 3.683781
+============= SORTED ===========
+Parallel Time: time_p 1.068068
+Speedup: 3.745080
+============= SORTED ===========
+Parallel Time: time_p 1.096299
+Speedup: 3.648640
+============= SORTED ===========
+Parallel Time: time_p 1.131857
+Speedup: 3.534016
+============= SORTED ===========
+Parallel Time: time_p 1.059579
+Speedup: 3.775084
+============= SORTED ===========
+Parallel Time: time_p 1.104012
+Speedup: 3.623149
+============= SORTED ===========
+Parallel Time: time_p 1.095509
+Speedup: 3.651271
+============= SORTED ===========
+Parallel Time: time_p 1.128244
+Speedup: 3.545333
+============= SORTED ===========
+Parallel Time: time_p 1.095816
+Speedup: 3.650247
+============= SORTED ===========
+Parallel Time: time_p 1.065335
+Speedup: 3.754687
+============= SORTED ===========
+Parallel Time: time_p 1.069115
+Speedup: 3.741413
+============= SORTED ===========
+Parallel Time: time_p 1.078462
+Speedup: 3.708986
+============= SORTED ===========
+Parallel Time: time_p 1.103787
+Speedup: 3.623888
+============= SORTED ===========
+Parallel Time: time_p 1.114175
+Speedup: 3.590101
+============= SORTED ===========
+Parallel Time: time_p 1.070809
+Speedup: 3.735494
+============= SORTED ===========
+Parallel Time: time_p 1.073473
+Speedup: 3.726223
+============= SORTED ===========
+Parallel Time: time_p 1.082078
+Speedup: 3.696590
+============= SORTED ===========
