@@ -1,13 +1,14 @@
-#include <stdio.h>
+#include <cstdio>
 #include <pthread.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
 #include <sys/time.h>
 
 #include <iostream>
 using namespace std;
 
-#define INPUT_SIZE 10000000
+#define INPUT_SIZE 100
 #define NUM_THREADS 4
 #define median(a,n) kth_smallest(a,n,(((n)&1)?((n)/2):(((n)/2)-1)))
 #define printf(x,...) 
@@ -229,7 +230,7 @@ void *calcPrefixSum(void* tid) {
 		num_threads = ps_msg[thread_id].last_thread - barr_id + 1;
 		k1     = pivots_indices[barr_id] - ps_msg[thread_id].start; 
 		k2     = prev_end - pivots_indices[barr_id] + 1; 
-		first  = ((double)k1/(k1+k2))*num_threads;
+		first  = round(((double)k1/(k1+k2))*num_threads);
 		first  = (first == 0)?1:first;
 		last   = num_threads - first;
 	
