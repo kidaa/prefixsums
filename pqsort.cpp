@@ -88,12 +88,7 @@ void *calcPrefixSum(void* tid) {
 
 	barr_id = ps_msg[thread_id].first_thread;
 	
-         if((ps_msg[thread_id].start > ps_msg[thread_id].end) ||
-			(ps_msg[thread_id].pstart > ps_msg[thread_id].pend)) {
-		printf("\n\nThread %d: Bad RETURNED\n\n", thread_id);
-		return NULL;
-	 }
-	if(barr_id == ps_msg[thread_id].last_thread) {
+         if(barr_id == ps_msg[thread_id].last_thread) {
 		printf("\n\nThread %d: RETURNED\n\n", thread_id);
 		qsort(from+ps_msg[thread_id].pstart, ps_msg[thread_id].pend-ps_msg[thread_id].pstart+1, sizeof(int), comp);
 		if(from == input1)
@@ -212,11 +207,9 @@ void *calcPrefixSum(void* tid) {
 	to   = tp;
 
 	if(thread_id == barr_id) {
-		if(from != input1) {
-			printf("Adding pivot: %d to %d\n",pivots[barr_id], pivots_indices[barr_id]);
-			to[pivots_indices[barr_id]] = pivots[barr_id];
-		}
 		
+		to[pivots_indices[barr_id]] = pivots[barr_id];
+			
 		prev_end = ps_msg[thread_id].pend;
 		prev_lt  = ps_msg[thread_id].last_thread;
 #ifndef DEBUG
@@ -228,11 +221,11 @@ void *calcPrefixSum(void* tid) {
 #endif
 		num_threads = ps_msg[thread_id].last_thread - barr_id + 1;
 		k1     = pivots_indices[barr_id] - ps_msg[thread_id].start; 
-		k1 = (k1 == 0)? 1 : k1;
-		k2     = prev_end - pivots_indices[barr_id]; 
-		first = ((double)k1/(double)(k1+k2))*num_threads;
-		first = (first == 0)?1:first;
-		last  = num_threads - first;
+		//k1     = (k1 == 0)? 1 : k1;
+		k2     = prev_end - pivots_indices[barr_id] + 1; 
+		first  = ((double)k1/(double)(k1+k2))*num_threads;
+		first  = (first == 0)?1:first;
+		last   = num_threads - first;
 	
 		new_pend = ps_msg[barr_id].pstart + k1-1;
 
@@ -253,30 +246,30 @@ void *calcPrefixSum(void* tid) {
 				e++;
 			}
 			ps_msg[i].pstart = ps_msg[thread_id].pstart;
-			ps_msg[i].pend   = new_pend;
-			ps_msg[i].start = s;
-			ps_msg[i].end   = e;
+			ps_msg[i].pend   = pivots_indices[barr_id]-1;
+			ps_msg[i].start  = s;
+			ps_msg[i].end    = e;
 			ps_msg[i].first_thread = ps_msg[thread_id].first_thread;
 			ps_msg[i].last_thread  = ps_msg[thread_id].first_thread+first-1;
 		}
 
 		printf("\n---------Thread: %d Second Paritioning: k:%d group:%d rem:%d first: %d last: %d------------\n", thread_id, k2, group2, rem2, first, last);
 	printf("loop from: %d to %d\n",  barr_id+first,barr_id+first+last);
-		for(i = (barr_id+first), e = pivots_indices[barr_id]; i < (barr_id+first+last); i++) {
+		for(i = (barr_id+first), e = pivots_indices[barr_id]-1; i < (barr_id+first+last); i++) {
 			s = e + 1;
 			e = s + group2 - 1;
 			if(rem2 > 0) {
 				rem2--;
 				e++;
 			}
-			ps_msg[i].pstart = pivots_indices[barr_id]+1;
+			ps_msg[i].pstart = pivots_indices[barr_id];
 			ps_msg[i].pend   = prev_end;
 			ps_msg[i].start = s;
 			ps_msg[i].end   = e;
 			ps_msg[i].first_thread = ps_msg[thread_id].first_thread+first;
 			ps_msg[i].last_thread  = ps_msg[thread_id].first_thread+first+last-1;
 		}
-
+/*
 		if((ps_msg[barr_id].pend-ps_msg[barr_id].pstart) < (ps_msg[barr_id].last_thread-ps_msg[barr_id].first_thread)) {
 			ps_msg[barr_id].last_thread = ps_msg[barr_id].first_thread;
 			for(i = barr_id + 1; i < (barr_id+first); i++) {
@@ -292,15 +285,15 @@ void *calcPrefixSum(void* tid) {
 				pthread_cancel(threads[i]);
 			}
 		}
-		
+		*/
 #ifndef DEBUG
 		for(i = 0; i < NUM_THREADS; i++) {
 			printf("Thread id: %d pstart: %d pend: %d start: %d end: %d first_thread:%d last_thread: %d\n", ps_msg[i].thread_id, ps_msg[i].pstart, ps_msg[i].pend, ps_msg[i].start, ps_msg[i].end, ps_msg[i].first_thread, ps_msg[i].last_thread);
 		}
 		
-		printf("Finding median from %d to %d at %d\n", ps_msg[thread_id].pstart ,new_pend+1, ps_msg[barr_id].pstart+((new_pend-ps_msg[barr_id].pstart)/2));
+		printf("Finding median from %d to %d at %d\n", ps_msg[thread_id].pstart ,pivots_indices[barr_id], ps_msg[barr_id].pstart+((pivots_indices[barr_id]-1-ps_msg[barr_id].pstart)/2));
 #endif
-		s = kth_smallest(from, ps_msg[barr_id].pstart, new_pend+1,  ps_msg[barr_id].pstart+((new_pend-ps_msg[barr_id].pstart)/2));
+		s = kth_smallest(from, ps_msg[barr_id].pstart, pivots_indices[barr_id],  ps_msg[barr_id].pstart+((pivots_indices[barr_id]-1-ps_msg[barr_id].pstart)/2));
 		printf("\n");
 		
 		pivots[barr_id] = t = from[s];
@@ -311,8 +304,8 @@ void *calcPrefixSum(void* tid) {
 
 		printf("First Median: %d pos: %d Index: %d\n",pivots[barr_id], s, barr_id);
 	
-		printf("Finding median from %d to %d at %d\n", pivots_indices[barr_id]+1 , prev_end+1, pivots_indices[barr_id]+1+((prev_end-pivots_indices[barr_id]-1)/2));
-		e = kth_smallest(from, pivots_indices[barr_id]+1, prev_end+1, pivots_indices[barr_id]+1+((prev_end-pivots_indices[barr_id]-1)/2));
+		printf("Finding median from %d to %d at %d\n", pivots_indices[barr_id] , prev_end+1, pivots_indices[barr_id]+((prev_end-pivots_indices[barr_id])/2));
+		e = kth_smallest(from, pivots_indices[barr_id], prev_end+1, pivots_indices[barr_id]+((prev_end-pivots_indices[barr_id])/2));
 		//printf("Median: %d pos: %d\n",from[e], e);
 
 #ifndef DEBUG
@@ -324,11 +317,11 @@ void *calcPrefixSum(void* tid) {
 #endif
 
 		pivots[barr_id+first] = t = from[e]; 
-		from[e] = from[pivots_indices[barr_id]+1];
-		from[pivots_indices[barr_id]+1] = t;
+		from[e] = from[pivots_indices[barr_id]];
+		from[pivots_indices[barr_id]] = t;
 		//printf("Adding pivot in %d value: %d\n",barr_id+first, t);
 #ifndef DEBUG
-		printf("Swapping %d and %d\n", e, pivots_indices[barr_id]+1);
+		printf("Swapping %d and %d\n", e, pivots_indices[barr_id]);
 		printf("Second Median: %d pos: %d Index: %d\n",pivots[barr_id+first], e, barr_id+first);
 		printf("Input: ");
 		for(i = 0; i < INPUT_SIZE; i++){
