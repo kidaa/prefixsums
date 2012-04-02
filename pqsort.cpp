@@ -9,10 +9,10 @@
 #include <iostream>
 using namespace std;
 
-#define INPUT_SIZE 10000000
-#define NUM_THREADS 4
-#define printf(x,...) 
-#define DEBUG
+#define INPUT_SIZE 100
+#define NUM_THREADS 6
+//#define printf(x,...) 
+//#define DEBUG
 
 typedef struct {
 	int thread_id;
@@ -91,7 +91,7 @@ void *calcPrefixSum(void* tid) {
          if(barr_id == ps_msg[thread_id].last_thread) {
 		printf("\n\nThread %d: RETURNED\n\n", thread_id);
 		qsort(from+ps_msg[thread_id].pstart, ps_msg[thread_id].pend-ps_msg[thread_id].pstart+1, sizeof(int), comp);
-		if(from == input1)
+		if(from != input1)
 		memcpy((void*)(to+ps_msg[thread_id].pstart), (void*)(from+ps_msg[thread_id].pstart), (ps_msg[thread_id].pend-ps_msg[thread_id].pstart+1)*sizeof(int));
 		return NULL;
 	}
@@ -227,8 +227,6 @@ void *calcPrefixSum(void* tid) {
 		first  = (first == 0)?1:first;
 		last   = num_threads - first;
 	
-		new_pend = ps_msg[barr_id].pstart + k1-1;
-
 		group1 = k1/first;
 		rem1   = k1%first;
 
@@ -413,7 +411,7 @@ void spawn_threads(const int len, const int num_threads) {
 int main() {
     srand(time(NULL));
     for(int i = 0; i < INPUT_SIZE; i++) {
-	//input3[i] = check[i] = input1[i] = rand()%INPUT_SIZE;
+	input3[i] = check[i] = input1[i] = rand()%INT_MAX;
     }
     double sTime, pTime;
     struct timeval tz;
